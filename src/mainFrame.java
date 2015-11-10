@@ -1,5 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * Created by joft on 2015. 11. 9..
@@ -11,6 +10,8 @@ public class mainFrame extends JFrame {
 
     private gamePanel gp;
     private infoPanel ip;
+
+    Thread th;
 
     mainFrame() {
 
@@ -30,7 +31,26 @@ public class mainFrame extends JFrame {
         addKeyListener(gp);
         add(gp);
         add(ip);
+        start();
 
+    }
+
+    private void start() {
+
+        gp.start();
+
+        th = new Thread() {
+            public void run() {
+                while(true) {
+
+                    ip.setValues(gp.getAppleX(), gp.getAppleY(), gp.getLarvars(), gp.getDelay());
+
+                    try{ Thread.sleep(100); } catch (Exception e) {}
+
+                }
+            };
+        };
+        th.start();
     }
 
     public static void main(String [] args) {

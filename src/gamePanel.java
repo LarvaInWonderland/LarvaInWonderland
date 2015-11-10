@@ -16,10 +16,9 @@ public class gamePanel extends JPanel implements KeyListener {
     private boolean moveUp;
     private boolean moveDown;
     private boolean game;
-    private boolean delayCheck;
     private int appleX;
     private int appleY;
-    private int DELAY = 100;
+    private int delay;
 
     private Larva larvas;
     private Thread th;
@@ -29,7 +28,7 @@ public class gamePanel extends JPanel implements KeyListener {
         setBounds(2, 76, WIDTH, HEIGHT);
         setBackground(Color.lightGray);
         init();
-        start();
+
     }
 
     void init() {
@@ -40,14 +39,8 @@ public class gamePanel extends JPanel implements KeyListener {
         moveUp = false;
         moveDown = false;
         game = true;
-        delayCheck = true;
+        delay = 100;
         appleCreate();
-
-    }
-
-    void log() {
-
-        System.out.println(appleX + "\t" + appleY + "\t" + DELAY);
 
     }
 
@@ -60,13 +53,11 @@ public class gamePanel extends JPanel implements KeyListener {
 
                 while(game) {
 
-                    larvas.overCheck();
-                    larvas.moveLarvas();
-                    checkApple();
+                    if(game) process();
                     repaint();
-                    log();
                     try{
-                        Thread.sleep(DELAY);
+                        Thread.sleep(delay);
+                        /*if(!game) this.wait();*/
                     }catch(Exception e){}
 
                 }
@@ -77,6 +68,13 @@ public class gamePanel extends JPanel implements KeyListener {
 
         th.start();
 
+    }
+
+    void process(){
+
+        larvas.overCheck();
+        larvas.moveLarvas();
+        checkApple();
     }
 
     void appleCreate() {
@@ -91,8 +89,28 @@ public class gamePanel extends JPanel implements KeyListener {
         if( larvas.x[0] >= appleX-10 && larvas.x[0] <= appleX+10
                 && larvas.y[0] >= appleY-10 && larvas.y[0] <= appleY+10 ) {
             larvas.larvaIncrement();
+            checkDelay();
             appleCreate();
         }
+
+    }
+
+    void checkDelay() {
+
+        if(larvas.larvas%10 == 0 && delay > 30) { delay -= 10; }
+
+    }
+
+    void gameOver(Graphics g) {
+
+        String msg = "Game Over";
+        Font font = new Font("Helvetica", Font.BOLD, 30);
+        FontMetrics metr = getFontMetrics(font);
+        g.setColor(Color.black);
+        g.fillRect(0, 0, WIDTH, HEIGHT);
+        g.setColor(Color.white);
+        g.setFont(font);
+        g.drawString(msg, (WIDTH - metr.stringWidth(msg)) / 2, HEIGHT / 2);
 
     }
 
@@ -103,6 +121,7 @@ public class gamePanel extends JPanel implements KeyListener {
         g.setColor(Color.green);
         g.fillRoundRect(appleX, appleY, 20, 20, 20, 20);
         larvas.drawLarvas(g);
+        if(!game) gameOver(g);
 
     }
 
@@ -127,12 +146,20 @@ public class gamePanel extends JPanel implements KeyListener {
             moveDown = true;
             moveLeft = moveRight = false;
         }
+        if( key == KeyEvent.VK_SPACE && !game ) {
+            game = true;
+        }
 
     }
     @Override
     public void keyTyped(KeyEvent e) {}
     @Override
     public void keyReleased(KeyEvent e) {}
+
+    public int getAppleX() { return appleX; }
+    public int getAppleY() { return appleY; }
+    public int getLarvars() { return larvas.larvas; }
+    public int getDelay() { return delay; }
 
     private class Larva {
 
@@ -151,7 +178,7 @@ public class gamePanel extends JPanel implements KeyListener {
         }
 
         void larvaIncrement() {
-            larvas++;
+            larvas+=5;
         }
 
         void moveLarvas() {
@@ -159,7 +186,6 @@ public class gamePanel extends JPanel implements KeyListener {
             for( int cnt = larvas ; cnt > 0 ; cnt-- ) {
                 x[cnt] = x[ cnt - 1 ];
                 y[cnt] = y[ cnt - 1 ];
-                if(cnt%10 == 0 && delayCheck ) { DELAY -= 10; delayCheck = false;}
             }
 
             if(moveLeft) x[0] -= larvaSize/2;
