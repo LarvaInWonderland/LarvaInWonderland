@@ -17,6 +17,8 @@ public class infoPanel extends JPanel {
     private JLabel larvasValue;
     private JLabel delay;
     private JLabel delayValue;
+    private JLabel fps;
+    private JLabel fpsValue;
 
     infoPanel() {
 
@@ -37,6 +39,8 @@ public class infoPanel extends JPanel {
         larvasValue = new JLabel();
         delay = new JLabel("delay");
         delayValue = new JLabel();
+        fps = new JLabel("FPS");
+        fpsValue = new JLabel();
 
         appleX.setBounds(10, 30, 50, 20);
         appleXvalue.setBounds(70, 30, 50, 20);
@@ -46,6 +50,8 @@ public class infoPanel extends JPanel {
         larvasValue.setBounds(310, 30, 50, 20);
         delay.setBounds(370, 30, 50, 20);
         delayValue.setBounds(430, 30, 50, 20);
+        fps.setBounds(490, 30, 50, 20);
+        fpsValue.setBounds(550, 30, 50, 20);
 
 
         add(appleX);
@@ -56,14 +62,18 @@ public class infoPanel extends JPanel {
         add(larvasValue);
         add(delay);
         add(delayValue);
+        add(fps);
+        add(fpsValue);
+
 
     }
 
-    public void setValues(int x, int y, int larvas, int delay) {
+    public void setValues(int x, int y, int larvas, long delay, int fps) {
         appleXvalue.setText(String.valueOf(x));
         appleYvalue.setText(String.valueOf(y));
         larvasValue.setText(String.valueOf(larvas));
         delayValue.setText(String.valueOf(delay));
+        fpsValue.setText(String.valueOf(fps));
     }
 
 }

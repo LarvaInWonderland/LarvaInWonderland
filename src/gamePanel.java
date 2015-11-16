@@ -2,9 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Arc2D;
 
 /**
- * Created by joft on 2015. 11. 9..
+ * 게임 화면
  */
 public class gamePanel extends JPanel implements KeyListener {
 
@@ -18,7 +19,9 @@ public class gamePanel extends JPanel implements KeyListener {
     private boolean game;
     private int appleX;
     private int appleY;
-    private int delay;
+    private long delay;
+    private int fps = 60;
+    private int fpsStr;
 
     private Larva larvas;
     private Thread th;
@@ -33,13 +36,12 @@ public class gamePanel extends JPanel implements KeyListener {
 
     void init() {
 
-        larvas = new Larva(5);
+        larvas = new Larva(7*5);
         moveRight = true;
         moveLeft = false;
         moveUp = false;
         moveDown = false;
         game = true;
-        delay = 100;
         appleCreate();
 
     }
@@ -51,14 +53,39 @@ public class gamePanel extends JPanel implements KeyListener {
             @Override
             public void run() {
 
+                long lastLoopTime = System.nanoTime();
+                long lastFpsTime = 0;
+                final int TARGET_FPS = 60;
+                final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
+
                 while(game) {
+
+                    // work out how long its been since the last update, this
+                    // will be used to calculate how far the entities should
+                    // move this loop
+                    long now = System.nanoTime();
+                    long updateLength = now - lastLoopTime;
+                    lastLoopTime = now;
+                    double delta = updateLength / ((double)OPTIMAL_TIME);
+
+                    // update the frame counter
+                    lastFpsTime += updateLength;
+                    fps++;
+
+                    if (lastFpsTime >= 1000000000)
+                    {
+                        setFps(fps);
+                        lastFpsTime = 0;
+                        fps = 0;
+                    }
 
                     if(game) process();
                     repaint();
+
                     try{
-                        Thread.sleep(delay);
-                        /*if(!game) this.wait();*/
-                    }catch(Exception e){}
+                        delay = (lastLoopTime-System.nanoTime() + OPTIMAL_TIME)/1000000;
+                        Thread.sleep( delay );
+                    } catch (Exception e) {}
 
                 }
 
@@ -79,9 +106,17 @@ public class gamePanel extends JPanel implements KeyListener {
 
     void appleCreate() {
 
-        appleX = (int)(Math.random() * 29) * larvas.larvaSize +10;
-        appleY = (int)(Math.random() * 29) * larvas.larvaSize +10;
+        boolean check = true;
 
+        while (check) {
+            for( int cnt = 0 ; cnt < larvas.larvas ; cnt++) {
+                appleX = (int) (Math.random() * 29) * larvas.larvaSize + 10;
+                appleY = (int) (Math.random() * 29) * larvas.larvaSize + 10;
+                if (appleX != larvas.x[cnt] || appleY != larvas.y[cnt]) {
+                    check = false;
+                }
+            }
+        }
     }
 
     void checkApple() {
@@ -89,15 +124,8 @@ public class gamePanel extends JPanel implements KeyListener {
         if( larvas.x[0] >= appleX-10 && larvas.x[0] <= appleX+10
                 && larvas.y[0] >= appleY-10 && larvas.y[0] <= appleY+10 ) {
             larvas.larvaIncrement();
-            checkDelay();
             appleCreate();
         }
-
-    }
-
-    void checkDelay() {
-
-        if(larvas.larvas%10 == 0 && delay > 30) { delay -= 10; }
 
     }
 
@@ -159,18 +187,24 @@ public class gamePanel extends JPanel implements KeyListener {
     public int getAppleX() { return appleX; }
     public int getAppleY() { return appleY; }
     public int getLarvars() { return larvas.larvas; }
-    public int getDelay() { return delay; }
+    public long getDelay() { return delay; }
+    public int getFps() { return fpsStr; }
+    public void setFps(int arg) { fpsStr = arg; }
 
     private class Larva {
 
         private final int larvaSize = 20;
 
         private int larvas;
+        private int delay;
         private int x[] = new int[999];
         private int y[] = new int[999];
+        private int moveX = 0;
+        private int moveY = 0;
 
         Larva(int larvasNum) {
             larvas = larvasNum;
+            delay = 1;
             for( int cnt = 0 ; cnt < larvas ; cnt++ ) {
                 x[cnt] = (int)WIDTH/3 - cnt * larvaSize;
                 y[cnt] = (int)HEIGHT/2;
@@ -178,7 +212,8 @@ public class gamePanel extends JPanel implements KeyListener {
         }
 
         void larvaIncrement() {
-            larvas+=5;
+            larvas+=7;
+            if(larvas%35==0) delay++;
         }
 
         void moveLarvas() {
@@ -188,10 +223,10 @@ public class gamePanel extends JPanel implements KeyListener {
                 y[cnt] = y[ cnt - 1 ];
             }
 
-            if(moveLeft) x[0] -= larvaSize/2;
-            if(moveRight) x[0] += larvaSize/2;
-            if(moveUp) y[0] -= larvaSize/2;
-            if(moveDown) y[0] += larvaSize/2;
+            if(moveLeft) {x[0] -= 2;}
+            if(moveRight) {x[0] += 2;}
+            if(moveUp) {y[0] -= 2;}
+            if(moveDown) {y[0] += 2;}
 
         }
 
@@ -199,8 +234,8 @@ public class gamePanel extends JPanel implements KeyListener {
 
             for( int cnt = 0 ; cnt < larvas ; cnt++ ) {
 
-                if(cnt == 0) { g.setColor(Color.blue); g.fillRoundRect(x[cnt], y[cnt], larvaSize, larvaSize, larvaSize, larvaSize); }
-                else { g.setColor(Color.BLACK); g.fillRoundRect(x[cnt], y[cnt], larvaSize, larvaSize, larvaSize, larvaSize); }
+                if(cnt == 0) { g.setColor(Color.blue); g.fillRoundRect(x[cnt]+moveX, y[cnt]+moveY, larvaSize, larvaSize, larvaSize, larvaSize); }
+                else if(cnt%7 == 0) { g.setColor(Color.BLACK); g.fillRoundRect(x[cnt]+moveX, y[cnt]+moveY, larvaSize, larvaSize, larvaSize, larvaSize); }
 
             }
 

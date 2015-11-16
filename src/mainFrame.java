@@ -43,7 +43,7 @@ public class mainFrame extends JFrame {
             public void run() {
                 while(true) {
 
-                    ip.setValues(gp.getAppleX(), gp.getAppleY(), gp.getLarvars(), gp.getDelay());
+                    ip.setValues(gp.getAppleX(), gp.getAppleY(), gp.getLarvars(), gp.getDelay(), gp.getFps());
 
                     try{ Thread.sleep(100); } catch (Exception e) {}
 
