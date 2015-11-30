@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.geom.Arc2D;
+//import java.awt.geom.Arc2D;
 
 /**
  * 게임 화면
@@ -36,7 +36,7 @@ public class gamePanel extends JPanel implements KeyListener {
 
     void init() {
 
-        larvas = new Larva(7*5);
+        larvas = new Larva(5*5);
         moveRight = true;
         moveLeft = false;
         moveUp = false;
@@ -60,15 +60,11 @@ public class gamePanel extends JPanel implements KeyListener {
 
                 while(game) {
 
-                    // work out how long its been since the last update, this
-                    // will be used to calculate how far the entities should
-                    // move this loop
                     long now = System.nanoTime();
                     long updateLength = now - lastLoopTime;
                     lastLoopTime = now;
-                    double delta = updateLength / ((double)OPTIMAL_TIME);
+                    /*double delta = updateLength / ((double)OPTIMAL_TIME);*/
 
-                    // update the frame counter
                     lastFpsTime += updateLength;
                     fps++;
 
@@ -110,9 +106,10 @@ public class gamePanel extends JPanel implements KeyListener {
 
         while (check) {
             for( int cnt = 0 ; cnt < larvas.larvas ; cnt++) {
-                appleX = (int) (Math.random() * 29) * larvas.larvaSize + 10;
-                appleY = (int) (Math.random() * 29) * larvas.larvaSize + 10;
-                if (appleX != larvas.x[cnt] || appleY != larvas.y[cnt]) {
+                appleX = (int) (Math.random() * 28) * larvas.larvaSize + 20;
+                appleY = (int) (Math.random() * 28) * larvas.larvaSize + 20;
+                if (appleX+10 != larvas.x[cnt] || appleX-10 != larvas.x[cnt] ||
+                        appleY+10 != larvas.y[cnt] || appleY-10 != larvas.y[cnt]) {
                     check = false;
                 }
             }
@@ -147,7 +144,7 @@ public class gamePanel extends JPanel implements KeyListener {
 
         super.paintComponent(g);
         g.setColor(Color.green);
-        g.fillRoundRect(appleX, appleY, 20, 20, 20, 20);
+        g.fillRoundRect(appleX-10, appleY-10, 20, 20, 20, 20);
         larvas.drawLarvas(g);
         if(!game) gameOver(g);
 
@@ -199,8 +196,6 @@ public class gamePanel extends JPanel implements KeyListener {
         private int delay;
         private int x[] = new int[999];
         private int y[] = new int[999];
-        private int moveX = 0;
-        private int moveY = 0;
 
         Larva(int larvasNum) {
             larvas = larvasNum;
@@ -212,7 +207,7 @@ public class gamePanel extends JPanel implements KeyListener {
         }
 
         void larvaIncrement() {
-            larvas+=7;
+            larvas+=5;
             if(larvas%35==0) delay++;
         }
 
@@ -234,8 +229,13 @@ public class gamePanel extends JPanel implements KeyListener {
 
             for( int cnt = 0 ; cnt < larvas ; cnt++ ) {
 
-                if(cnt == 0) { g.setColor(Color.blue); g.fillRoundRect(x[cnt]+moveX, y[cnt]+moveY, larvaSize, larvaSize, larvaSize, larvaSize); }
-                else if(cnt%7 == 0) { g.setColor(Color.BLACK); g.fillRoundRect(x[cnt]+moveX, y[cnt]+moveY, larvaSize, larvaSize, larvaSize, larvaSize); }
+                if(cnt < 6) {
+                    g.setColor(Color.blue);
+                    g.fillRoundRect(x[cnt]-larvaSize/2, y[cnt]-larvaSize/2, larvaSize, larvaSize, larvaSize, larvaSize);
+                } else if(x[cnt]!=0 && y[cnt]!=0){
+                    g.setColor(Color.black);
+                    g.fillRoundRect(x[cnt]-larvaSize/2, y[cnt]-larvaSize/2, larvaSize, larvaSize, larvaSize, larvaSize);
+                }
 
             }
 

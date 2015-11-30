@@ -19,6 +19,7 @@ public class mainFrame extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);
+        setTitle("Larva In Wonderland");
         init();
 
     }
